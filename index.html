@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Photo Cleaner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #downloadLink {
+            display: none;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        #downloadLink:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <h2>Privacy Photo Cleaner</h2>
+    <p>Remove metadata & prevent AI from reading text in images.</p>
+
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Upload & Process</button>
+
+    <p id="status"></p>
+    <a id="downloadLink" download>Download Processed Image</a>
+</div>
+
+<script>
+    async function uploadFile() {
+    let fileInput = document.getElementById("fileInput");
+    let statusText = document.getElementById("status");
+    let downloadLink = document.getElementById("downloadLink");
+
+    if (!fileInput.files.length) {
+        statusText.innerText = "Please select a file.";
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    statusText.innerText = "Uploading and processing...";
+
+    try {
+        let response = await fetch("http://127.0.0.1:5000/upload", {
+            method: "POST",
+            body: formData,
+            headers: { "Accept": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        let blob = await response.blob();
+        let url = window.URL.createObjectURL(blob);
+
+        downloadLink.href = url;
+        downloadLink.style.display = "block";
+        downloadLink.innerText = "Download Processed Image";
+        statusText.innerText = "Processing complete!";
+    } catch (error) {
+        statusText.innerText = "Upload failed. Please try again.";
+        console.error("Fetch error:", error);
+    }
+}
+
+</script>
+
+</body>
+</html>
